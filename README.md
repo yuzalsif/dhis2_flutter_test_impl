@@ -122,19 +122,3 @@ As per DHIS2 Android SDK `v1.12.0` documentation:
 *   `android/settings.gradle`: Android project-level Gradle settings, configures repositories (like JitPack) and Flutter plugin loading.
 *   `android/app/src/main/kotlin/.../MainActivity.kt`: Native Android code implementing the platform channel handler and DHIS2 SDK interaction.
 *   `android/app/src/main/AndroidManifest.xml`: Includes necessary permissions like `android.permission.INTERNET`.
-
-## Further Development & Considerations
-
-*   **Error Handling:** Enhance error parsing from `D2Error` to provide more specific user feedback.
-*   **State Management:** For a production app, use a robust Flutter state management solution (Provider, BLoC, Riverpod, etc.) to manage login state and user data.
-*   **SDK Initialization Flow:** Consider initializing `D2Manager` earlier in the app lifecycle, perhaps with a splash screen, if the configuration is static.
-*   **Data Synchronization:** After successful login, implement calls to synchronize metadata and data (e.g., `d2.metadataModule().blockingDownload()`).
-*   **Security:** Always use HTTPS for DHIS2 instances in production. The SDK handles secure session management.
-*   **Code Organization:** For larger integrations, move native DHIS2 logic out of `MainActivity.kt` into dedicated service or manager classes.
-*   **iOS Integration:** This project focuses on Android. A similar platform channel implementation would be needed for iOS, using the DHIS2 iOS SDK.
-
-## Troubleshooting
-
-*   **Gradle Sync Issues:** Ensure your `android/settings.gradle` and `android/app/build.gradle` are correctly configured. Try `flutter clean`, then delete the `.gradle` folder in `android/`, and then run `flutter pub get` followed by `flutter run`. In Android Studio, `File > Invalidate Caches / Restart...` can also help.
-*   **"Unresolved reference" in Kotlin:** Double-check imports in `MainActivity.kt` and ensure the DHIS2 SDK dependency version in `app/build.gradle` matches the API you're using.
-*   **Network Errors:** Verify your DHIS2 server URL is correct and accessible. If using HTTP (not recommended for production), ensure `android:usesCleartextTraffic="true"` is set in `AndroidManifest.xml` (for Android 9+).
