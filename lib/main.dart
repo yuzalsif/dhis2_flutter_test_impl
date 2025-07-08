@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'generated/dhis2_api.g.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -30,7 +32,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const platform = MethodChannel('dhis2.login.channel');
+  final Dhis2LoginApi _dhis2Api = Dhis2LoginApi();
 
   final _formKey = GlobalKey<FormState>();
   final _serverUrlController = TextEditingController();
@@ -44,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _serverUrlController.text = 'https://your-dhis2-instance.org';
+    _serverUrlController.text = 'https://play.im.dhis2.org/stable-2-41-4-1';
     _usernameController.text = 'admin';
     _passwordController.text = 'district';
 
@@ -53,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _checkLoginStatus() async {
     try {
-      final bool isLoggedIn = await platform.invokeMethod('isUserLoggedIn');
+      final bool isLoggedIn = await _dhis2Api.isUserLoggedIn();
       setState(() {
         _isLoggedIn = isLoggedIn;
         _loginStatus = isLoggedIn ? 'User is logged in' : 'Not logged in';
@@ -73,18 +75,26 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       try {
-        final String result = await platform.invokeMethod('login', {
-          'serverUrl': _serverUrlController.text.trim(),
-          'username': _usernameController.text.trim(),
-          'password': _passwordController.text,
-        });
+        final credentials = LoginCredentials(
+          serverUrl: _serverUrlController.text.trim(),
+          username: _usernameController.text.trim(),
+          password: _passwordController.text,
+        );
+
+        final LoginResult result = await _dhis2Api.login(credentials);
+
         setState(() {
-          _loginStatus = result;
+          _loginStatus = result.successMessage;
           _isLoggedIn = true;
         });
       } on PlatformException catch (e) {
         setState(() {
-          _loginStatus = "Login Failed: ${e.code} - ${e.message}";
+          _loginStatus = "Login Failed: ${e.message}";
+          _isLoggedIn = false;
+        });
+      } catch (e) {
+        setState(() {
+          _loginStatus = "An unexpected error occurred: $e";
           _isLoggedIn = false;
         });
       } finally {
@@ -96,24 +106,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _logout() async {
-    setState(() {
-      _isLoading = true;
-      _loginStatus = 'Logging out...';
-    });
+    setState(() => _isLoading = true);
     try {
-      final String result = await platform.invokeMethod('logout');
+      await _dhis2Api.logout();
       setState(() {
-        _loginStatus = result;
+        _loginStatus = 'Logout successful';
         _isLoggedIn = false;
       });
     } on PlatformException catch (e) {
-      setState(() {
-        _loginStatus = "Logout Failed: ${e.message}";
-      });
+      setState(() => _loginStatus = "Logout Failed: ${e.message}");
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 

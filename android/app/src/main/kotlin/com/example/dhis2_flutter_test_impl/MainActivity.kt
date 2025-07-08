@@ -21,12 +21,13 @@ class MainActivity : FlutterActivity(), Dhis2LoginApi {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val d2Configuration = D2Configuration.builder()
-                    .appName("dhis2_flutter_app").appVersion("1.0.0")
-                    .context(applicationContext.applicationContext).build()
-
+                    .appName("dhis2_flutter_app")
+                    .appVersion("1.0.0")
+                    .context(applicationContext.applicationContext)
+                    .build()
                 D2Manager.blockingInstantiateD2(d2Configuration)
-                val d2Instance: D2 = D2Manager.getD2()
-                val user = d2Instance.userModule()
+
+                val user = D2Manager.getD2().userModule()
                     .logIn(credentials.username, credentials.password, credentials.serverUrl)
                     .blockingGet()
 
@@ -34,13 +35,15 @@ class MainActivity : FlutterActivity(), Dhis2LoginApi {
                     username = user.username()!!,
                     successMessage = "Login successful for user: ${user.username()}"
                 )
-
                 callback(Result.success(result))
 
-            } catch (e: D2Error) {
-                callback(Result.failure(Exception("Login Failed: ${e.errorDescription()}")))
             } catch (e: Exception) {
-                callback(Result.failure(Exception("An unexpected native error occurred: ${e.message}")))
+                val cause = e.cause
+                if (cause is D2Error) {
+                    callback(Result.failure(Exception("Login Failed: ${cause.errorDescription()}")))
+                } else {
+                    callback(Result.failure(Exception("An unexpected native error occurred: ${e.message}")))
+                }
             }
         }
     }
