@@ -2,6 +2,7 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(PigeonOptions(
   dartOut: 'lib/generated/dhis2_api.g.dart',
+  dartPackageName: 'dhis2_flutter_test_impl',
   kotlinOut:
   'android/app/src/main/kotlin/com/example/dhis2_flutter_test_impl/Dhis2Api.g.kt',
   kotlinOptions: KotlinOptions(
