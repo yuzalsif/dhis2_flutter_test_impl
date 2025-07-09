@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _serverUrlController.text = 'https://your-dhis2-instance.org';
+    _serverUrlController.text = 'https://play.im.dhis2.org/stable-2-41-4-1';
     _usernameController.text = 'admin';
     _passwordController.text = 'district';
 
